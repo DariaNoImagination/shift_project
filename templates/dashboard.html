@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Service - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .navbar .logo span {
+            color: #3498db;
+        }
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .navbar .user-info .username {
+            font-weight: 500;
+        }
+        .badge-admin {
+            background: #e74c3c;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-user {
+            background: #3498db;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .stat-card h3 {
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+
+        .admin-panel {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        }
+        .admin-panel.show {
+            display: flex;
+        }
+        .admin-panel .admin-link {
+            background: white;
+            color: #e67e22;
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .admin-panel .admin-link:hover {
+            transform: scale(1.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .date-badge {
+            font-size: 14px;
+            font-weight: 400;
+            color: #888;
+            background: #f0f2f5;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .room-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .room-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+        .room-card h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .room-card .meta {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .room-card .meta strong {
+            color: #555;
+        }
+        .room-card .slots-container {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .slot {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .slot-available {
+            background: #27ae60;
+            color: white;
+        }
+        .slot-empty {
+            color: #999;
+            font-size: 13px;
+            font-style: italic;
+        }
+        .slot .book-btn {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 1px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .slot .book-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .bookings-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .bookings-section .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .bookings-section h2 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .booking-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+        .booking-item .booking-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .booking-item .booking-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .booking-item .booking-details {
+            color: #888;
+            font-size: 14px;
+        }
+        .booking-item .booking-details .room-name {
+            color: #3498db;
+            font-weight: 500;
+        }
+        .booking-item .booking-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .status-active {
+            color: #27ae60;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .status-cancelled {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .status-completed {
+            color: #3498db;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .empty-state {
+            color: #999;
+            padding: 30px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .modal .form-group {
+            margin-bottom: 15px;
+        }
+        .modal .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .modal .form-group input,
+        .modal .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .modal .form-group input:focus,
+        .modal .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .modal .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal .form-actions .btn-cancel {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .modal .form-actions .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .toast-success { background: #27ae60; }
+        .toast-error { background: #e74c3c; }
+        .toast-info { background: #3498db; }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">BookingService</div>
+        <div class="user-info">
+            <span class="username"> <span id="username">Загрузка...</span></span>
+            <span id="roleBadge" class="badge-user">USER</span>
+            <a href="/logout" class="logout-btn">Выйти</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div id="adminPanel" class="admin-panel">
+            <span><strong>Административная панель</strong></span>
+            <button class="admin-link" onclick="goToAdminPanel()">Перейти</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+
+                <h3>Комнаты</h3>
+                <div class="value" id="totalRooms">-</div>
+            </div>
+            <div class="stat-card">
+
+                <h3>Свободных слотов</h3>
+                <div class="value" id="totalAvailable">-</div>
+            </div>
+            <div class="stat-card">
+
+                <h3>Мои бронирования</h3>
+                <div class="value" id="myBookings">-</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title">
+                Доступные комнаты
+                <span class="date-badge" id="todayDate">сегодня</span>
+            </div>
+            <button class="btn-primary" onclick="showBookingModal()">
+                Создать бронирование
+            </button>
+        </div>
+        <div class="rooms-grid" id="rooms"></div>
+
+        <div class="bookings-section">
+            <div class="header">
+                <h2>Мои бронирования</h2>
+                <span style="color:#888;font-size:14px;" id="bookingsCount">0</span>
+            </div>
+            <div id="myBookingsList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка бронирований...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal">
+            <h2>Создать бронирование</h2>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="modalRoom">Комната</label>
+                    <select id="modalRoom" required>
+                        <option value="">Выберите комнату...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalSlot">Временной слот</label>
+                    <select id="modalSlot" required>
+                        <option value="">Сначала выберите комнату...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalDate">Дата</label>
+                    <input type="date" id="modalDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalTitle">Название встречи</label>
+                    <input type="text" id="modalTitle" placeholder="Например: Командная встреча">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeBookingModal()">Отмена</button>
+                    <button type="submit" class="btn-primary" id="submitBookingBtn">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" style="display:none;"></div>
+
+    <script>
+
+async function fetchWithAuth(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        }
+    });
+    if (response.status === 401) {
+        window.location.href = '/login';
+    }
+    return response;
+}
+
+
+    function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast toast-${type}`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('ru-RU', options);
+}
+
+function formatDateInput(dateStr) {
+    const date = new Date(dateStr);
+    return date.toISOString().split('T')[0];
+}
+
+function goToAdminPanel() {
+    window.location.href = '/admin';
+}
+
+async function loadDashboard() {
+    try {
+        const response = await fetchWithAuth('/api/rooms/availability');
+        const data = await response.json();
+
+        // --- Пользователь ---
+        document.getElementById('username').textContent = data.user.username;
+
+        const roleBadge = document.getElementById('roleBadge');
+        if (data.user.role === 'admin') {
+            roleBadge.textContent = 'ADMIN';
+            roleBadge.className = 'badge-admin';
+            document.getElementById('adminPanel').classList.add('show');
+        } else {
+            roleBadge.textContent = 'EMPLOYEE';
+            roleBadge.className = 'badge-user';
+        }
+
+        document.getElementById('todayDate').textContent = formatDate(data.booking_date);
+
+        document.getElementById('totalRooms').textContent = data.statistics.total_rooms;
+        document.getElementById('totalAvailable').textContent = data.statistics.total_available_slots;
+        document.getElementById('myBookings').textContent = data.statistics.my_bookings_count;
+
+        roomsData = data.rooms_availability.map(r => r.room);
+        bookingsData = data.my_bookings;
+
+        // --- Комнаты ---
+        const roomsContainer = document.getElementById('rooms');
+        if (data.rooms_availability.length === 0) {
+            roomsContainer.innerHTML = `
+                <div class="room-card">
+                    <div class="empty-state">
+                        <p>Нет доступных комнат</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            roomsContainer.innerHTML = data.rooms_availability.map(room => {
+                let slotsHtml = '';
+                if (room.available_slots.length === 0) {
+                    slotsHtml = '<span class="slot-empty">Нет свободных слотов</span>';
+                } else {
+                    slotsHtml = room.available_slots.map(s =>
+                        `<span class="slot slot-available">
+                            ${s.start_time}–${s.end_time}
+                            <button class="book-btn" onclick="openBookingForSlot(${room.room.id}, ${s.id}, '${s.start_time}', '${s.end_time}')">📌</button>
+                        </span>`
+                    ).join('');
+                }
+
+                return `
+                    <div class="room-card">
+                        <h3>${room.room.name}</h3>
+                        <div class="meta"><strong>Вместимость:</strong> ${room.room.capacity} чел.</div>
+                        <div class="meta"><strong>Расположение:</strong> ${room.room.location || 'не указано'}</div>
+                        <div class="meta"><strong>Свободно:</strong> ${room.available_count} из ${room.total_slots}</div>
+                        <div class="slots-container">${slotsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+
+        const bookingsContainer = document.getElementById('myBookingsList');
+        document.getElementById('bookingsCount').textContent = `${data.my_bookings.length} записей`;
+
+        if (data.my_bookings.length === 0) {
+            bookingsContainer.innerHTML = `
+                <div class="empty-state">
+                    <p>У вас нет активных бронирований</p>
+                    <p style="font-size:14px;color:#aaa;margin-top:5px;">Нажмите «Создать бронирование»</p>
+                </div>
+            `;
+        } else {
+            bookingsContainer.innerHTML = data.my_bookings.map(b => {
+                const roomName = data.rooms_availability.find(r => r.room.id === b.room_id)?.room.name || `Комната ${b.room_id}`;
+
+                let statusText = '';
+                let statusClass = '';
+                if (b.status === 'active') {
+                    statusText = 'Активно';
+                    statusClass = 'status-active';
+                } else if (b.status === 'cancelled') {
+                    statusText = 'Отменено';
+                    statusClass = 'status-cancelled';
+                } else if (b.status === 'completed') {
+                    statusText = 'Завершено';
+                    statusClass = 'status-completed';
+                }
+
+                return `
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <span class="booking-title">${b.title || 'Без названия'}</span>
+                            <span class="booking-details">
+                                <span class="room-name">${roomName}</span>
+                                · ${formatDate(b.booking_date)}
+                                · Слот #${b.time_slot_id}
+                            </span>
+                        </div>
+                        <div class="booking-actions">
+                            <span class="${statusClass}">${statusText}</span>
+                            ${b.status === 'active' ? `<button class="btn-danger btn-sm" onclick="cancelBooking(${b.id})">✕ Отменить</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+    } catch (error) {
+        console.error('Ошибка загрузки дашборда:', error);
+        showToast('Ошибка загрузки данных', 'error');
+    }
+}
+
+function showBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    modal.classList.add('active');
+
+    const today = new Date();
+    document.getElementById('modalDate').value = formatDateInput(today);
+
+    const roomSelect = document.getElementById('modalRoom');
+    roomSelect.innerHTML = '<option value="">Выберите комнату...</option>';
+
+    if (roomsData && roomsData.length > 0) {
+        roomsData.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room.id;
+            option.textContent = `${room.name} (вместимость: ${room.capacity})`;
+            roomSelect.appendChild(option);
+        });
+    } else {
+        loadDashboard().then(() => {
+            roomsData.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.id;
+                option.textContent = `${room.name} (вместимость: ${room.capacity})`;
+                roomSelect.appendChild(option);
+            });
+        });
+    }
+
+    document.getElementById('modalSlot').innerHTML = '<option value="">Сначала выберите комнату...</option>';
+}
+
+function closeBookingModal() {
+    document.getElementById('bookingModal').classList.remove('active');
+    document.getElementById('bookingForm').reset();
+}
+
+function openBookingForSlot(roomId, slotId, startTime, endTime) {
+    showBookingModal();
+    document.getElementById('modalRoom').value = roomId;
+    document.getElementById('modalRoom').dispatchEvent(new Event('change'));
+    setTimeout(() => {
+        document.getElementById('modalSlot').value = slotId;
+    }, 100);
+    showToast(`Выбран слот ${startTime}–${endTime}`, 'info');
+}
+
+document.getElementById('modalRoom').addEventListener('change', async function() {
+    const roomId = this.value;
+    const slotSelect = document.getElementById('modalSlot');
+
+    if (!roomId) {
+        slotSelect.innerHTML = '<option value="">Сначала выберите комнату...</option>';
+        return;
+    }
+
+    const date = document.getElementById('modalDate').value;
+    if (!date) {
+        slotSelect.innerHTML = '<option value="">Сначала выберите дату...</option>';
+        return;
+    }
+
+    try {
+        const response = await fetchWithAuth(`/api/rooms/availability?booking_date=${date}`);
+        const data = await response.json();
+
+        slotSelect.innerHTML = '<option value="">Выберите слот...</option>';
+
+        const roomData = data.rooms_availability.find(r => r.room.id === parseInt(roomId));
+        if (roomData && roomData.available_slots.length > 0) {
+            roomData.available_slots.forEach(slot => {
+                const option = document.createElement('option');
+                option.value = slot.id;
+                option.textContent = `${slot.start_time}–${slot.end_time}`;
+                slotSelect.appendChild(option);
+            });
+        } else {
+            slotSelect.innerHTML = '<option value="">Нет свободных слотов на эту дату</option>';
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки слотов:', error);
+        slotSelect.innerHTML = '<option value="">Ошибка загрузки слотов</option>';
+    }
+});
+
+document.getElementById('modalDate').addEventListener('change', function() {
+    const event = new Event('change');
+    document.getElementById('modalRoom').dispatchEvent(event);
+});
+
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const roomId = document.getElementById('modalRoom').value;
+    const slotId = document.getElementById('modalSlot').value;
+    const date = document.getElementById('modalDate').value;
+    const title = document.getElementById('modalTitle').value;
+
+    if (!roomId || !slotId || !date) {
+        showToast('Заполните все обязательные поля', 'error');
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitBookingBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Создание...';
+
+    try {
+        const response = await fetchWithAuth('/bookings', {
+            method: 'POST',
+            body: JSON.stringify({
+                room_id: parseInt(roomId),
+                time_slot_id: parseInt(slotId),
+                booking_date: date,
+                title: title || 'Встреча'
+            })
+        });
+
+        if (response.ok) {
+            showToast('Бронирование создано', 'success');
+            closeBookingModal();
+            loadDashboard();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Ошибка создания бронирования', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка соединения с сервером', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Создать';
+    }
+});
+
+async function cancelBooking(bookingId) {
+    if (!confirm('Вы уверены, что хотите отменить это бронирование?')) return;
+
+    try {
+        const response = await fetchWithAuth(`/bookings/${bookingId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast('Бронирование отменено', 'success');
+            loadDashboard();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Ошибка отмены бронирования', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка соединения с сервером', 'error');
+    }
+}
+
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeBookingModal();
+    }
+});
+
+
+loadDashboard();
+setInterval(loadDashboard, 60000);
+
+
+    </script>
+</body>
+</html>

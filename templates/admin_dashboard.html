@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - Booking Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .navbar .logo span {
+            color: #f39c12;
+        }
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .navbar .user-info .username {
+            font-weight: 500;
+        }
+        .badge-admin {
+            background: #e74c3c;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .back-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+        .back-btn:hover {
+            background: #2980b9;
+        }
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 32px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-header p {
+            color: #888;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .stat-card h3 {
+            color: #888;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+        .stat-card.admin {
+            border-left: 4px solid #e74c3c;
+        }
+        .stat-card.rooms {
+            border-left: 4px solid #3498db;
+        }
+        .stat-card.bookings {
+            border-left: 4px solid #27ae60;
+        }
+        .stat-card.active {
+            border-left: 4px solid #f39c12;
+        }
+
+        .chart-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .chart-section h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 200px;
+            padding: 10px 0;
+            overflow-x: auto;
+        }
+        .chart-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 50px;
+        }
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            min-height: 4px;
+        }
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+        .chart-label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .chart-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+        .empty-chart {
+            color: #999;
+            text-align: center;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .activity-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .activity-section .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .activity-section h2 {
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        .activity-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-item .activity-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .activity-item .activity-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .activity-item .activity-details {
+            color: #888;
+            font-size: 14px;
+        }
+        .activity-item .activity-details .room-name {
+            color: #3498db;
+            font-weight: 500;
+        }
+        .activity-item .activity-details .user-name {
+            color: #e67e22;
+            font-weight: 500;
+        }
+        .activity-item .activity-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .activity-item .activity-time {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .btn-danger-sm {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-danger-sm:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary-sm {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: default;
+        }
+
+        .empty-state {
+            color: #999;
+            padding: 30px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><span>Admin</span>Panel</div>
+        <div class="user-info">
+            <span class="username"><span id="adminName">Загрузка...</span></span>
+            <span class="badge-admin">ADMIN</span>
+            <a href="/dashboard" class="back-btn">← На главную</a>
+            <a href="/logout" class="logout-btn">Выйти</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="page-header">
+            <h1>Административная панель</h1>
+            <p>Управление и мониторинг системы бронирования</p>
+        </div>
+
+        <div class="stats-grid" id="stats">
+            <div class="stat-card admin">
+                <h3>Всего пользователей</h3>
+                <div class="value" id="totalUsers">-</div>
+            </div>
+            <div class="stat-card rooms">
+                <h3>Активных комнат</h3>
+                <div class="value" id="totalRooms">-</div>
+            </div>
+            <div class="stat-card bookings">
+                <h3>Всего бронирований</h3>
+                <div class="value" id="totalBookings">-</div>
+            </div>
+            <div class="stat-card active">
+                <h3>Активных бронирований</h3>
+                <div class="value" id="activeBookings">-</div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>Бронирования по дням</h2>
+            <div id="chartContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка данных...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <div class="header">
+                <h2>Все бронирования</h2>
+                <span style="color:#888;font-size:14px;" id="totalBookingsCount">0</span>
+            </div>
+            <div id="activityList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка бронирований...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast" style="display:none;"></div>
+
+    <script>
+
+        async function fetchWithAuth(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        }
+    });
+    if (response.status === 401) {
+        window.location.href = '/login';
+    }
+    return response;
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast toast-${type}`;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+function formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return date.toLocaleDateString('ru-RU', options);
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('ru-RU', options);
+}
+
+async function adminCancelBooking(bookingId) {
+    if (!confirm('Вы уверены, что хотите отменить это бронирование?')) return;
+
+    try {
+
+        const response = await fetchWithAuth(`/bookings/${bookingId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast('Бронирование отменено администратором!', 'success');
+            loadAdminDashboard();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Ошибка отмены бронирования', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка соединения с сервером', 'error');
+    }
+}
+
+async function loadAdminDashboard() {
+    try {
+        console.log('Загрузка админ-панели...');
+
+        const response = await fetchWithAuth('/api/admin/statistics');
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Данные получены:', data);
+
+
+        document.getElementById('totalUsers').textContent = data.statistics.total_users;
+        document.getElementById('totalRooms').textContent = data.statistics.total_rooms;
+        document.getElementById('totalBookings').textContent = data.statistics.total_bookings;
+        document.getElementById('activeBookings').textContent = data.statistics.active_bookings;
+        document.getElementById('totalBookingsCount').textContent = `${data.statistics.total_bookings} записей`;
+
+
+        const chartContainer = document.getElementById('chartContainer');
+        const bookingsByDate = data.bookings_by_date;
+        const dates = Object.keys(bookingsByDate).sort();
+        const values = dates.map(d => bookingsByDate[d]);
+        const maxValue = Math.max(...values, 1);
+
+        if (dates.length === 0) {
+            chartContainer.innerHTML = `
+                <div class="empty-chart">
+                    Нет данных для отображения
+                </div>
+            `;
+        } else {
+            chartContainer.innerHTML = `
+                <div class="chart-bars">
+                    ${dates.map((date, index) => `
+                        <div class="chart-bar-wrapper">
+                            <div class="chart-value">${values[index]}</div>
+                            <div class="chart-bar" style="height: ${(values[index] / maxValue) * 150 + 10}px;"></div>
+                            <div class="chart-label">${formatDate(date)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+
+        const activityContainer = document.getElementById('activityList');
+        const activities = data.all_bookings || data.recent_activity || [];
+
+        if (activities.length === 0) {
+            activityContainer.innerHTML = `
+                <div class="empty-state">
+                    <p>Нет бронирований для отображения</p>
+                </div>
+            `;
+        } else {
+            activityContainer.innerHTML = activities.map(b => {
+                let statusText = '';
+                let statusClass = '';
+                let actionsHtml = '';
+
+                if (b.status === 'active') {
+                    statusText = 'Активно';
+                    statusClass = 'status-active';
+                    actionsHtml = `
+                        <button class="btn-danger-sm" onclick="adminCancelBooking(${b.id})">✕ Отменить</button>
+                    `;
+                } else if (b.status === 'cancelled') {
+                    statusText = 'Отменено';
+                    statusClass = 'status-cancelled';
+                    actionsHtml = `<span class="btn-secondary-sm">Отменено</span>`;
+                } else if (b.status === 'completed') {
+                    statusText = 'Завершено';
+                    statusClass = 'status-completed';
+                    actionsHtml = `<span class="btn-secondary-sm">Завершено</span>`;
+                }
+
+                const userName = b.user_id ? `Пользователь ${b.user_id}` : 'Неизвестный';
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <span class="activity-title">${b.title || 'Без названия'}</span>
+                            <span class="activity-details">
+                                <span class="room-name">Комната ${b.room_id}</span>
+                                · ${formatDate(b.booking_date)}
+                                · <span class="user-name">${userName}</span>
+                            </span>
+                        </div>
+                        <div class="activity-actions">
+                            <span class="${statusClass}">${statusText}</span>
+                            ${actionsHtml}
+                            <span class="activity-time">${formatDateTime(b.created_at)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        console.log('Админ-панель загружена успешно!');
+
+    } catch (error) {
+        console.error('Ошибка загрузки админ-панели:', error);
+        showToast('Ошибка загрузки данных', 'error');
+    }
+}
+
+
+loadAdminDashboard();
+setInterval(loadAdminDashboard, 30000);
+    </script>
+
+</body>
+</html>
